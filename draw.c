@@ -23,9 +23,9 @@
   ====================*/
 void scanline_convert( struct matrix *points, int i, screen s, zbuffer zb ) {
 
-  color c = {rand() % 255, rand() & 255, rand() % 255};
+  color c = {rand() % 250, rand() % 250, rand() % 250};
 
-  double xt, yt, zt, xm, ym, zm, xb, yb, zbo;
+  double xt, yt, zt, xm, ym, zm, xb, yb, zbo, yOffset0, yOffset1;
   double x0, x1, x2, dx, dx0, dx1, z0, z1, z2, dz, dz0, dz1, y0, y1, y2;
 
   yt = LONG_MIN;
@@ -61,16 +61,6 @@ void scanline_convert( struct matrix *points, int i, screen s, zbuffer zb ) {
   yb = points->m[1][i+pb];
   zbo = points->m[2][i+pb];
 
-  x0 = xb;
-  x1 = xb;
-  x2 = xm;
-  y0 = yb;
-  y1 = ym;
-  y2 = yt;
-  z0 = zbo;
-  z1 = zbo;
-  z2 = zm;
-
   dx = (xt - xb) / (yt - yb);
   dz = (zt - zbo) / (yt - yb);
 
@@ -79,6 +69,19 @@ void scanline_convert( struct matrix *points, int i, screen s, zbuffer zb ) {
 
   dx1 = (xt - xm) / (yt - ym);
   dz1 = (zt - zm) / (yt - ym);
+
+  yOffset0 = ceil(yb) - yb;
+  yOffset1 = ceil(ym) - ym;
+
+  x0 = xb + (dx * yOffset0);
+  x1 = xb + (dx0 * yOffset0);
+  x2 = xm + (dx1 * yOffset1);
+  y0 = ceil(yb);
+  y1 = ceil(ym);
+  y2 = ceil(yt);
+  z0 = zbo + (dz * yOffset0);
+  z1 = zbo + (dz0 * yOffset0);
+  z2 = zm + (dz1 * yOffset1);
 
   if(yb == ym) y0 = y1;
 
