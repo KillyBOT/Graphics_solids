@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 
 #include "ml6.h"
 #include "display.h"
@@ -93,6 +94,7 @@ void parse_file ( char * filename,
   c.red = 0;
   c.green = 255;
   c.blue = 255;
+  srand(time(0));
 
   if ( strcmp(filename, "stdin") == 0 )
     f = stdin;

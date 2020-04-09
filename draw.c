@@ -26,7 +26,7 @@ void scanline_convert( struct matrix *points, int i, screen s, zbuffer zb ) {
   color c = {rand() % 255, rand() & 255, rand() % 255};
 
   double xt, yt, zt, xm, ym, zm, xb, yb, zbo;
-  double x0, x1, x2, dx, dx0, dx1, z0, z1, z2, dz, dz0, dz1, y0, y1;
+  double x0, x1, x2, dx, dx0, dx1, z0, z1, z2, dz, dz0, dz1, y0, y1, y2;
 
   yt = LONG_MIN;
   yb = LONG_MAX;
@@ -65,7 +65,8 @@ void scanline_convert( struct matrix *points, int i, screen s, zbuffer zb ) {
   x1 = xb;
   x2 = xm;
   y0 = yb;
-  y1 = yt;
+  y1 = ym;
+  y2 = yt;
   z0 = zbo;
   z1 = zbo;
   z2 = zm;
@@ -79,19 +80,13 @@ void scanline_convert( struct matrix *points, int i, screen s, zbuffer zb ) {
   dx1 = (xt - xm) / (yt - ym);
   dz1 = (zt - zm) / (yt - ym);
 
-  if(yb == ym){
-    x1 = xm;
-    z1 = zm;
-    y0 = ym;
-    dx0 = dx1;
-    dz0 = dz1;
-  }
+  if(yb == ym) y0 = y1;
 
-  printf("%lf %lf %lf %lf %lf %lf\n", dx, dz, dx0, dz0, dx1, dz1);
-  printf("Bottom: %lf %lf\nMiddle: %lf %lf\nTop: %lf %lf\n", xb, yb, xm, ym, xt, yt);
+  //printf("%lf %lf %lf %lf %lf %lf\n", dx, dz, dx0, dz0, dx1, dz1);
+  //printf("Bottom: %lf %lf\nMiddle: %lf %lf\nTop: %lf %lf\n", xb, yb, xm, ym, xt, yt);
 
 
-  while(y0 < ym){
+  while(y0 < y1){
     draw_line(x0, y0, z0, x1, y0, z1, s, zb, c);
 
     //printf("%lf %lf %lf %lf %lf %lf\n", x0, y0, z0, x1, y0, z1);
@@ -105,7 +100,7 @@ void scanline_convert( struct matrix *points, int i, screen s, zbuffer zb ) {
     y0 += 1;
 
   }
-  while(y0 < yt){
+  while(y0 < y2){
     draw_line(x0, y0, z0, x2, y0, z2, s, zb, c);
 
     //printf("%lf %lf %lf %lf %lf %lf\n", x0, y0, z0, x1, y0, z1);
@@ -118,7 +113,7 @@ void scanline_convert( struct matrix *points, int i, screen s, zbuffer zb ) {
 
     y0 += 1;
   }
-  printf("\n");
+  //printf("\n");
   
 }
 
