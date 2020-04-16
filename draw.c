@@ -23,7 +23,8 @@
   ====================*/
 void scanline_convert( struct matrix *points, int i, screen s, zbuffer zb ) {
 
-  color c = {rand() % 250, rand() % 250, rand() % 250};
+  color c = {rand() % 255, rand() % 255, rand() % 255};
+  //color black = {0, 0, 0};
 
   double xt, yt, zt, xm, ym, zm, xb, yb, zbo, yOffset0, yOffset1;
   double x0, x1, x2, dx, dx0, dx1, z0, z1, z2, dz, dz0, dz1, y0, y1, y2;
@@ -43,11 +44,11 @@ void scanline_convert( struct matrix *points, int i, screen s, zbuffer zb ) {
     }
   }
 
-  for(int n = 0; n < 3; n++){
-    if(n != pt && n != pb){
-      pm = n;
-    }
-  }
+  pm = pb + pt;
+
+  if(pm == 1) pm = 2;
+  else if(pm == 2) pm = 1;
+  else if(pm == 3) pm = 0;
 
   xt = points->m[0][i+pt];
   yt = points->m[1][i+pt];
@@ -76,12 +77,12 @@ void scanline_convert( struct matrix *points, int i, screen s, zbuffer zb ) {
   x0 = xb + (dx * yOffset0);
   x1 = xb + (dx0 * yOffset0);
   x2 = xm + (dx1 * yOffset1);
-  y0 = ceil(yb);
-  y1 = ceil(ym);
-  y2 = ceil(yt);
   z0 = zbo + (dz * yOffset0);
   z1 = zbo + (dz0 * yOffset0);
   z2 = zm + (dz1 * yOffset1);
+  y0 = ceil(yb);
+  y1 = ceil(ym);
+  y2 = ceil(yt);
 
   if(yb == ym) y0 = y1;
 
@@ -90,7 +91,8 @@ void scanline_convert( struct matrix *points, int i, screen s, zbuffer zb ) {
 
 
   while(y0 < y1){
-    draw_line(x0, y0, z0, x1, y0, z1, s, zb, c);
+    //draw_line(x0, y0, z0, x1, y0, z1, s, zb, c);
+    draw_line_horizontal(x0, x1, y0, z0, z1, s, zb, c);
 
     //printf("%lf %lf %lf %lf %lf %lf\n", x0, y0, z0, x1, y0, z1);
 
@@ -104,7 +106,8 @@ void scanline_convert( struct matrix *points, int i, screen s, zbuffer zb ) {
 
   }
   while(y0 < y2){
-    draw_line(x0, y0, z0, x2, y0, z2, s, zb, c);
+    //draw_line(x0, y0, z0, x2, y0, z2, s, zb, c);
+    draw_line_horizontal(x0, x2, y0, z0, z2, s, zb, c);
 
     //printf("%lf %lf %lf %lf %lf %lf\n", x0, y0, z0, x1, y0, z1);
 
@@ -117,6 +120,10 @@ void scanline_convert( struct matrix *points, int i, screen s, zbuffer zb ) {
     y0 += 1;
   }
   //printf("\n");
+
+  //draw_line(xt, yt, zt, xb, yb, zbo, s, zb, black);
+  //draw_line(xt, yt, zt, xm, ym, zm, s, zb, black);
+  //draw_line(xm, ym, zm, xb, yb, zbo, s, zb, black);
   
 }
 
@@ -701,7 +708,7 @@ void draw_line(int x0, int y0, double z0,
 
   while ( loop_start < loop_end ) {
 
-    if(z > zb[x][y]){
+    if(x >= 0 && x < XRES && y >= 0 && y < YRES && z > zb[x][y]){
       plot( s, zb, c, x, y, 0);
       zb[x][y] = z;
     }
@@ -722,8 +729,48 @@ void draw_line(int x0, int y0, double z0,
     z += dz;
     loop_start++;
   } //end drawing loop
-  if(z > zb[x1][y1]){
+  if(x1 >= 0 && x1 < XRES && y1 >= 0 && y1 < YRES && z >= zb[x1][y1]){
       plot( s, zb, c, x1, y1, 0);
       zb[x1][y1] = z;
     }
 } //end draw_line
+void draw_line_horizontal(int x0, int x1, 
+  int y, double z0, double z1, 
+  screen s, zbuffer zb, color c){
+
+  int x, xf;
+  double z, zf, dz;
+
+  if(x1 > x0){
+    x = x0;
+    xf = x1;
+    z = z0;
+    zf = z1;
+  } else {
+    x = x1;
+    xf = x0;
+    z = z1;
+    zf = z0;
+  }
+
+  dz = (zf - z) / (xf - x);
+
+  if(y < 0 || y >= YRES) return;
+
+  while(x < xf){
+
+    if(x >= 0 && x < XRES && z > zb[x][y]){
+      plot(s, zb, c, x, y, 0);
+      zb[x][y] = z;
+    }
+
+    z+=dz;
+    x++;
+  }
+
+  if(xf >= 0 && xf < XRES && z > zb[xf][y]){
+    plot(s, zb, c, xf, y, 0);
+    zb[xf][y] = z;
+  }
+
+}

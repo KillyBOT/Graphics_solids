@@ -94,7 +94,7 @@ void parse_file ( char * filename,
   c.red = 0;
   c.green = 255;
   c.blue = 255;
-  srand(time(0));
+  srand(2123);
 
   if ( strcmp(filename, "stdin") == 0 )
     f = stdin;
